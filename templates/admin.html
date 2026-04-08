@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Admin Panel</h2>
+<table border="1">
+<tr><th>Sender</th><th>Receiver</th><th>Message</th><th>Time</th></tr>
+{% for m in msgs %}
+<tr>
+<td>{{m[0]}}</td>
+<td>{{m[1]}}</td>
+<td>{{m[2]}}</td>
+<td>{{m[3]}}</td>
+</tr>
+{% endfor %}
+</table>
+</body>
+</html>

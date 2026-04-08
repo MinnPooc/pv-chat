@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Private Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+
+<div class="chat-app">
+
+  <div class="header">
+    <span>{{ user }}</span>
+    <a href="/logout">Logout</a>
+  </div>
+
+  <div class="select-bar">
+    <select id="u">
+      {% for x in users %}
+      <option>{{ x }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div id="status"></div>
+
+  <div id="box"></div>
+
+  <div class="input-bar">
+    <input id="m" placeholder="Type a message">
+    <button onclick="send()">Send</button>
+  </div>
+
+</div>
+
+<script>
+const me="{{ user }}";
+const s=io();
+const box=document.getElementById("box");
+const u=document.getElementById("u");
+
+function join(){
+ box.innerHTML="";
+ s.emit("join",{me:me,you:u.value});
+}
+u.onchange=join;
+join();
+
+s.on("load",d=>{
+ d.forEach(x=>{
+  box.innerHTML+=`<div class="msg ${x[0]==me?'me':'you'}">${x[1]}</div>`;
+ });
+ box.scrollTop=box.scrollHeight;
+});
+
+s.on("msg",d=>{
+ box.innerHTML+=`<div class="msg ${d.s==me?'me':'you'}">${d.m}</div>`;
+ box.scrollTop=box.scrollHeight;
+});
+
+function send(){
+ if(!m.value) return;
+ s.emit("send",{me:me,you:u.value,msg:m.value});
+ m.value="";
+}
+
+setInterval(()=>{
+ fetch("/status/"+u.value)
+ .then(r=>r.json())
+ .then(d=>status.innerText=d.status);
+},3000);
+</script>
+
+</body>
+</html>
