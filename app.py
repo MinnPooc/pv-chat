@@ -126,18 +126,60 @@ def login():
             return redirect("/chat")
     return render_template("login.html")
 
-@app.route("/signup", methods=["GET","POST"])
+@app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        u = request.form["username"]
-        p = generate_password_hash(request.form["password"])
+        u = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        if not u or not password:
+            return "Username and password are required", 400
+
+        p = generate_password_hash(password)
+
+        con = db()
+        cur = con.cursor()
+
         try:
-            con = db(); cur = con.cursor()
-            cur.execute("INSERT INTO users VALUES(NULL,?,?)", (u,p))
-            con.commit(); con.close()
-            return redirect("/login")
-        except:
-            pass
+            cur.execute(
+                "INSERT INTO users (username, password) VALUES (?, ?)",
+                (u, p)
+            )
+
+            con.commit()
+
+            # Create the profile immediately
+            user_id = cur.lastrowid
+
+            cur.execute(
+                """
+                INSERT INTO profiles
+                (user_id, display_name, bio, avatar)
+                VALUES (?, ?, '', '')
+                """,
+                (user_id, u)
+            )
+
+            con.commit()
+
+        except sqlite3.IntegrityError:
+            con.rollback()
+            con.close()
+            return "Username already exists", 409
+
+        except sqlite3.Error as e:
+            con.rollback()
+            con.close()
+            return f"Database error: {e}", 500
+
+        finally:
+            try:
+                con.close()
+            except:
+                pass
+
+        return redirect("/login")
+
     return render_template("signup.html")
 
 @app.route("/logout")
@@ -232,10 +274,10 @@ def status(u):
     return jsonify({"status": f"Last seen: {last_seen.get(u,'Never')}"})
 
 # ----------- ADMIN (HIDDEN URL) ----------
-@app.route("/admin-9x_typ0")
+@app.route("/admin-h9tq32")
 @login_required
 def admin():
-    if session["user"] != "admin":
+    if session["user"] != "MSI":
         return "Forbidden", 403
     con = db(); cur = con.cursor()
     cur.execute("SELECT sender,receiver,content,time FROM messages")
