@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover"><title>Private Chat - PV Chat</title>
+
+<link rel="stylesheet" href="/static/style.css">
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<header class="header"><a href="/profile" class="user-info">
+    {% if profile.avatar %}
+        <img
+            src="/avatar/{{ profile.avatar }}"
+            class="header-avatar"
+            alt="Profile picture"
+        >
+    {% else %}
+        <div class="header-avatar-placeholder">
+            {{ profile.display_name[0]|upper }}
+        </div>
+    {% endif %}
+
+    <div class="user-text">
+        <strong>{{ profile.display_name }}</strong>
+        <span>@{{ profile.username }}</span>
+    </div>
+</a>
+
+<a class="logout" href="/logout">Logout</a>
+
+</header>
+
+<div class="select-bar">
+    <label for="u">Chat with</label>
+
+    <select id="u">
+    {% for x in users %}
+    <option value="{{ x.username }}">
+        {{ x.display_name }} (@{{ x.username }})
+    </option>
+    {% endfor %}
+    </select>
+
+    <div id="status" class="status">Offline</div>
+</div>
+
+<main id="box" class="message-box"></main>
+
+<form class="input-bar" onsubmit="send(); return false;">
+    <input
+        id="m"
+        type="text"
+        placeholder="Type a message..."
+        autocomplete="off"
+        enterkeyhint="send"
+    >
+
+    <button type="submit">Send</button>
+</form>
+
+</div><script>
+const me = {{ user|tojson }};
+const socket = io();
+
+const box = document.getElementById("box");
+const userSelect = document.getElementById("u");
+const messageInput = document.getElementById("m");
+const statusElement = document.getElementById("status");
+
+
+function escapeHTML(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+
+function addMessage(sender, message) {
+    const element = document.createElement("div");
+
+    element.className =
+        "msg " + (sender === me ? "me" : "you");
+
+    element.textContent = message;
+
+    box.appendChild(element);
+    box.scrollTop = box.scrollHeight;
+}
+
+
+function join() {
+    box.innerHTML = "";
+
+    socket.emit("join", {
+        me: me,
+        you: userSelect.value
+    });
+}
+
+
+userSelect.addEventListener("change", join);
+
+
+socket.on("load", messages => {
+    box.innerHTML = "";
+
+    messages.forEach(message => {
+        addMessage(message[0], message[1]);
+    });
+
+    box.scrollTop = box.scrollHeight;
+});
+
+
+socket.on("msg", data => {
+    addMessage(data.s, data.m);
+});
+
+
+function send() {
+    const message = messageInput.value.trim();
+
+    if (!message) {
+        return;
+    }
+
+    socket.emit("send", {
+        me: me,
+        you: userSelect.value,
+        msg: message
+    });
+
+    messageInput.value = "";
+    messageInput.focus();
+}
+
+
+messageInput.addEventListener("keydown", event => {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        send();
+    }
+});
+
+
+function updateStatus() {
+    fetch("/status/" + encodeURIComponent(userSelect.value))
+        .then(response => response.json())
+        .then(data => {
+            statusElement.textContent = data.status;
+        })
+        .catch(() => {
+            statusElement.textContent = "Unavailable";
+        });
+}
+
+
+setInterval(updateStatus, 3000);
+updateStatus();
+
+join();
+</script></body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8"><meta
+    name="viewport"
+    content="width=device-width,
+             initial-scale=1.0,
+             viewport-fit=cover"
+>
+
+<title>Edit Profile - PV Chat</title>
+
+<link
+    rel="stylesheet"
+    href="/static/style.css"
+>
+
+</head><body><main class="profile-page"><section class="profile-card profile-edit-card">
+
+    <h1 class="profile-edit-title">
+        Edit Profile
+    </h1>
+
+    <p class="profile-edit-subtitle">
+        Customize how you appear in PV Chat.
+    </p>
+
+
+    <!-- CURRENT AVATAR -->
+
+    <div class="profile-avatar-container">
+
+        {% if avatar %}
+
+            <img
+                class="profile-avatar"
+                src="/avatar/{{ avatar }}"
+                alt="Profile picture"
+            >
+
+        {% else %}
+
+            <div class="profile-avatar-placeholder">
+                {{ display_name[0]|upper }}
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- PROFILE INFORMATION -->
+
+    <form
+        method="post"
+        class="profile-form"
+    >
+
+        <label for="display_name">
+            Display name
+        </label>
+
+        <input
+            id="display_name"
+            name="display_name"
+            value="{{ display_name }}"
+            maxlength="50"
+            placeholder="Display name"
+            autocomplete="name"
+            required
+        >
+
+
+        <label for="bio">
+            Bio
+        </label>
+
+        <textarea
+            id="bio"
+            name="bio"
+            maxlength="500"
+            placeholder="Tell people something about yourself..."
+        >{{ bio }}</textarea>
+
+
+        <button
+            type="submit"
+            class="profile-button primary"
+        >
+            Save Changes
+        </button>
+
+    </form>
+
+
+    <!-- PROFILE PICTURE -->
+
+    <div class="profile-section">
+
+        <h2>
+            Profile Picture
+        </h2>
+
+        <p>
+            Upload an image to use as your profile picture.
+        </p>
+
+        <form
+            method="post"
+            action="/profile/avatar"
+            enctype="multipart/form-data"
+            class="avatar-form"
+        >
+
+            <label
+                class="file-input"
+                for="avatar"
+            >
+                Choose Image
+
+                <input
+                    id="avatar"
+                    type="file"
+                    name="avatar"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    required
+                >
+            </label>
+
+            <button
+                type="submit"
+                class="profile-button secondary"
+            >
+                Upload Picture
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- NAVIGATION -->
+
+    <div class="profile-navigation">
+
+        <a href="/profile">
+            Cancel
+        </a>
+
+        <a href="/chat">
+            Back to Chat
+        </a>
+
+    </div>
+
+</section>
+
+</main></body>
+</html>

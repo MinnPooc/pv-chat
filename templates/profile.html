@@ -1,0 +1,95 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8"><meta
+    name="viewport"
+    content="width=device-width,
+             initial-scale=1.0,
+             viewport-fit=cover"
+>
+
+<title>{{ display_name }} - PV Chat</title>
+
+<link
+    rel="stylesheet"
+    href="/static/style.css"
+>
+
+</head><body><main class="profile-page"><section class="profile-card">
+
+    <!-- PROFILE PICTURE -->
+
+    <div class="profile-avatar-container">
+
+        {% if avatar %}
+
+            <img
+                class="profile-avatar"
+                src="/avatar/{{ avatar }}"
+                alt="Profile picture"
+            >
+
+        {% else %}
+
+            <div class="profile-avatar-placeholder">
+                {{ display_name[0]|upper }}
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- NAME -->
+
+    <h1 class="profile-name">
+        {{ display_name }}
+    </h1>
+
+
+    <!-- USERNAME -->
+
+    <p class="profile-username">
+        @{{ username }}
+    </p>
+
+
+    <!-- BIO -->
+
+    {% if bio %}
+
+        <p class="profile-bio">
+            {{ bio }}
+        </p>
+
+    {% else %}
+
+        <p class="profile-bio profile-bio-empty">
+            No bio yet.
+        </p>
+
+    {% endif %}
+
+
+    <!-- ACTIONS -->
+
+    <div class="profile-actions">
+
+        <a
+            class="profile-button primary"
+            href="/profile/edit"
+        >
+            Edit Profile
+        </a>
+
+        <a
+            class="profile-button secondary"
+            href="/chat"
+        >
+            Back to Chat
+        </a>
+
+    </div>
+
+</section>
+
+</main></body>
+</html>

@@ -1,12 +1,142 @@
-<!DOCTYPE html>
-<html>
-<body>
-<h2>Sign Up</h2>
-<form method="post">
-<input name="username" placeholder="Username"><br>
-<input name="password" type="password" placeholder="Password"><br>
-<button>Create</button>
-</form>
-<a href="/login">Login</a>
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Sign Up - PV Chat</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    html, body {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+    }
+
+    body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+
+        font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                     "Segoe UI", sans-serif;
+
+        background: #f4f6f8;
+        color: #1f2937;
+    }
+
+    .signup-card {
+        width: 100%;
+        max-width: 380px;
+        padding: 32px 24px;
+
+        background: white;
+        border-radius: 18px;
+
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    h2 {
+        margin: 0 0 8px;
+        text-align: center;
+        font-size: 28px;
+    }
+
+    .subtitle {
+        margin: 0 0 24px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    input {
+        width: 100%;
+        padding: 14px 15px;
+
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+
+        font-size: 16px;
+        outline: none;
+    }
+
+    input:focus {
+        border-color: #6b7280;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+
+        border: 0;
+        border-radius: 10px;
+
+        background: #111827;
+        color: white;
+
+        font-size: 16px;
+        font-weight: 600;
+
+        cursor: pointer;
+    }
+
+    button:active {
+        transform: scale(0.98);
+    }
+
+    .login {
+        display: block;
+        margin-top: 20px;
+
+        text-align: center;
+        color: #4b5563;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .login:hover {
+        text-decoration: underline;
+    }
+</style>
+
+</head><body><main class="signup-card">
+    <h2>PV Chat</h2>
+    <p class="subtitle">Create your account</p>
+
+    <form method="post">
+        <input
+            name="username"
+            type="text"
+            placeholder="Username"
+            autocomplete="username"
+            required
+        >
+
+        <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            autocomplete="new-password"
+            required
+        >
+
+        <button type="submit">Create Account</button>
+    </form>
+
+    <a class="login" href="/login">
+        Already have an account? Login
+    </a>
+</main>
+
 </body>
 </html>

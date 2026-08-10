@@ -1,0 +1,114 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+}
+
+/* MAIN CONTAINER */
+.chat-app {
+    width: 100%;
+    max-width: 600px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* HEADER */
+.header {
+    padding: 10px;
+    background: #020617;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+/* USER SELECT */
+.select-bar {
+    padding: 8px;
+    background: #020617;
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+    background: #020617;
+    color: #fff;
+    border: 1px solid #334155;
+    border-radius: 6px;
+}
+
+/* STATUS */
+#status {
+    padding: 6px 10px;
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* CHAT BOX */
+#box {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background: #020617;
+}
+
+/* MESSAGE */
+.msg {
+    max-width: 80%;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    word-wrap: break-word;
+    font-size: 14px;
+}
+
+.me {
+    background: #2563eb;
+    margin-left: auto;
+    text-align: right;
+}
+
+.you {
+    background: #334155;
+}
+
+/* INPUT BAR */
+.input-bar {
+    display: flex;
+    padding: 8px;
+    gap: 6px;
+    background: #020617;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+}
+
+button {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+    background: #2563eb;
+    color: white;
+}
+
+/* DESKTOP MODE */
+@media (min-width: 900px) {
+    .chat-app {
+        max-width: 800px;
+    }
+}

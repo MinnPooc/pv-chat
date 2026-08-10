@@ -1,76 +1,347 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Private Chat</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8"><meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               viewport-fit=cover">
+
+<title>Private Chat - PV Chat</title>
+
 <link rel="stylesheet" href="/static/style.css">
+
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-</head>
-<body>
 
-<div class="chat-app">
+</head><body><div class="chat-app"><!-- HEADER -->
+<header class="header">
 
-  <div class="header">
-    <span>{{ user }}</span>
-    <a href="/logout">Logout</a>
-  </div>
+    <a href="/profile" class="user-info">
 
-  <div class="select-bar">
+        {% if profile.avatar %}
+
+            <img
+                src="/avatar/{{ profile.avatar }}"
+                class="header-avatar"
+                alt="Profile picture"
+            >
+
+        {% else %}
+
+            <div class="header-avatar-placeholder">
+                {{ profile.display_name[0]|upper }}
+            </div>
+
+        {% endif %}
+
+        <div class="user-text">
+
+            <strong>
+                {{ profile.display_name }}
+            </strong>
+
+            <span>
+                @{{ profile.username }}
+            </span>
+
+        </div>
+
+    </a>
+
+    <a class="logout" href="/logout">
+        Logout
+    </a>
+
+</header>
+
+
+<!-- USER SELECT -->
+<div class="select-bar">
+
+    <label for="u">
+        Chat with
+    </label>
+
     <select id="u">
-      {% for x in users %}
-      <option>{{ x }}</option>
-      {% endfor %}
+
+        {% for x in users %}
+
+        <option value="{{ x.username }}">
+            {{ x.display_name }} (@{{ x.username }})
+        </option>
+
+        {% endfor %}
+
     </select>
-  </div>
-
-  <div id="status"></div>
-
-  <div id="box"></div>
-
-  <div class="input-bar">
-    <input id="m" placeholder="Type a message">
-    <button onclick="send()">Send</button>
-  </div>
 
 </div>
 
-<script>
-const me="{{ user }}";
-const s=io();
-const box=document.getElementById("box");
-const u=document.getElementById("u");
 
-function join(){
- box.innerHTML="";
- s.emit("join",{me:me,you:u.value});
+<!-- STATUS -->
+<div id="status">
+    Offline
+</div>
+
+
+<!-- SCROLLABLE MESSAGE AREA -->
+<main id="box" class="message-box"></main>
+
+<div id="typing-indicator" class="typing-indicator"></div>
+
+<!-- MESSAGE INPUT -->
+<form
+    class="input-bar"
+    onsubmit="send(); return false;"
+>
+
+    <textarea
+        id="m"
+        name="message"
+        rows="1"
+        placeholder="Type a message..."
+        autocomplete="off"
+        autocorrect="on"
+        autocapitalize="sentences"
+        spellcheck="true"
+        enterkeyhint="send"
+    ></textarea>
+
+    <button type="submit">
+        Send
+    </button>
+
+</form>
+
+</div><script>
+
+const me = {{ user|tojson }};
+
+const socket = io();
+
+const box = document.getElementById("box");
+const userSelect = document.getElementById("u");
+const messageInput = document.getElementById("m");
+const statusElement = document.getElementById("status");
+
+function resizeMessageInput() {
+
+    messageInput.style.height = "auto";
+
+    const height = Math.min(
+        messageInput.scrollHeight,
+        120
+    );
+
+    messageInput.style.height = height + "px";
 }
-u.onchange=join;
+
+messageInput.addEventListener("input", resizeMessageInput);
+
+/* =========================================================
+   ADD MESSAGE
+   ========================================================= */
+
+function addMessage(sender, message) {
+
+    const element = document.createElement("div");
+
+    element.className =
+        "msg " + (sender === me ? "me" : "you");
+
+    /*
+     * textContent prevents HTML injection.
+     */
+    element.textContent = message;
+
+    box.appendChild(element);
+
+    /*
+     * Always show newest message.
+     */
+    box.scrollTop = box.scrollHeight;
+}
+
+
+/* =========================================================
+   JOIN CHAT
+   ========================================================= */
+
+function join() {
+    box.innerHTML = "";
+
+    const target = userSelect.value;
+
+    if (!target) {
+        return;
+    }
+
+    socket.emit("join", {
+        me: me,
+        you: target
+    });
+}
+
+/* =========================================================
+   USER CHANGED
+   ========================================================= */
+
+userSelect.addEventListener(
+    "change",
+    join
+);
+
+
+/* =========================================================
+   LOAD MESSAGE HISTORY
+   ========================================================= */
+
+socket.on("load", messages => {
+
+    box.innerHTML = "";
+
+    messages.forEach(message => {
+
+        addMessage(
+            message[0],
+            message[1]
+        );
+
+    });
+
+    requestAnimationFrame(() => {
+        box.scrollTop = box.scrollHeight;
+    });
+
+});
+
+
+/* =========================================================
+   RECEIVE MESSAGE
+   ========================================================= */
+
+socket.on("msg", data => {
+
+    addMessage(
+        data.s,
+        data.m
+    );
+
+});
+
+
+/* =========================================================
+   SEND MESSAGE
+   ========================================================= */
+
+function send() {
+
+    const message =
+        messageInput.value.trim();
+
+    if (!message) {
+        return;
+    }
+
+    const target =
+        userSelect.value;
+
+    if (!target) {
+        return;
+    }
+
+    socket.emit("send", {
+
+        me: me,
+
+        you: target,
+
+        msg: message
+
+    });
+
+    messageInput.value = "";
+
+    messageInput.focus();
+
+}
+
+
+/* =========================================================
+   ENTER TO SEND
+   ========================================================= */
+
+messageInput.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Enter" &&
+            !event.shiftKey
+        ) {
+
+            event.preventDefault();
+
+            send();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ONLINE STATUS
+   ========================================================= */
+
+function updateStatus() {
+
+    const target =
+        userSelect.value;
+
+    if (!target) {
+
+        statusElement.textContent =
+            "No user selected";
+
+        return;
+    }
+
+    fetch(
+        "/status/" +
+        encodeURIComponent(target)
+    )
+
+    .then(response =>
+        response.json()
+    )
+
+    .then(data => {
+
+        statusElement.textContent =
+            data.status;
+
+    })
+
+    .catch(() => {
+
+        statusElement.textContent =
+            "Unavailable";
+
+    });
+
+}
+
+
+setInterval(
+    updateStatus,
+    3000
+);
+
+
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
+
+updateStatus();
+
 join();
 
-s.on("load",d=>{
- d.forEach(x=>{
-  box.innerHTML+=`<div class="msg ${x[0]==me?'me':'you'}">${x[1]}</div>`;
- });
- box.scrollTop=box.scrollHeight;
-});
-
-s.on("msg",d=>{
- box.innerHTML+=`<div class="msg ${d.s==me?'me':'you'}">${d.m}</div>`;
- box.scrollTop=box.scrollHeight;
-});
-
-function send(){
- if(!m.value) return;
- s.emit("send",{me:me,you:u.value,msg:m.value});
- m.value="";
-}
-
-setInterval(()=>{
- fetch("/status/"+u.value)
- .then(r=>r.json())
- .then(d=>status.innerText=d.status);
-},3000);
-</script>
-
-</body>
+</script></body>
 </html>
